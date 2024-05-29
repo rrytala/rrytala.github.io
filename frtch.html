@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Data from Google Sheets</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Sheets Data</h1>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Email</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzB8bgmuG-hVCiLQp5H_3Cfqzz8MJJklDvHMGOdE3n4gevyCvn_1Z90jnnV5VA8fwnq/exec'; 
+
+        async function fetchData() {
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+            displayData(data);
+        }
+
+        function displayData(data) {
+            const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // 既存のテーブルデータをクリア
+            data.forEach(row => {
+                const newRow = tableBody.insertRow();
+                for (let key in row) {
+                    const newCell = newRow.insertCell();
+                    const newText = document.createTextNode(row[key]);
+                    newCell.appendChild(newText);
+                }
+            });
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
