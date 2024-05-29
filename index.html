@@ -3,25 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Sheets Form</title>
+    <title>Google Sheets Integration</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <h1>Google Sheets Form</h1>
-    <form id="myForm">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br>
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <button type="submit">Submit</button>
-    </form>
+    <h1>Google Sheets Integration</h1>
+    <button onclick="showForm()">Send Data</button>
+    <button onclick="showTable()">Fetch Data</button>
+    
+    <div id="formDiv" style="display: none;">
+        <h2>Send Data to Google Sheets</h2>
+        <form id="myForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    
+    <div id="tableDiv" style="display: none;">
+        <h2>Google Sheets Data</h2>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzB8bgmuG-hVCiLQp5H_3Cfqzz8MJJklDvHMGOdE3n4gevyCvn_1Z90jnnV5VA8fwnq/exec'; // Google Apps ScriptウェブアプリのURLをここに貼り付けます
+
+        function showForm() {
+            document.getElementById('formDiv').style.display = 'block';
+            document.getElementById('tableDiv').style.display = 'none';
+        }
+
+        function showTable() {
+            document.getElementById('formDiv').style.display = 'none';
+            document.getElementById('tableDiv').style.display = 'block';
+            fetchData();
+        }
+
         document.getElementById('myForm').onsubmit = function(e) {
             e.preventDefault();
             const form = new FormData(this);
-            fetch('https://script.google.com/macros/s/AKfycbxN-KMD7SoSthyGiyLlX1uTtvWiss_-cYETBHG9-Qet4dCeM4O2p5PsS1gcu0eFnkro/exec', {
+            fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: form
             })
@@ -29,12 +75,32 @@
             .then(data => {
                 if (data === 'Success') {
                     alert('Data submitted successfully!');
+                    document.getElementById('myForm').reset();
                 } else {
                     alert('An error occurred: ' + data);
                 }
             })
             .catch(error => console.log('An error occurred: ' + error));
         };
+
+        async function fetchData() {
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+            displayData(data);
+        }
+
+        function displayData(data) {
+            const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clear existing table data
+            data.forEach(row => {
+                const newRow = tableBody.insertRow();
+                for (let key in row) {
+                    const newCell = newRow.insertCell();
+                    const newText = document.createTextNode(row[key]);
+                    newCell.appendChild(newText);
+                }
+            });
+        }
     </script>
 </body>
 </html>
